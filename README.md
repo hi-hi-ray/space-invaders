@@ -64,7 +64,7 @@ Adicione notas adicionais sobre como implantar isso em um sistema ao vivo
 
 ## Autores
 
-* ** Raysa Dutra ** - * Tradução Pt-Br * - [hi-hi-ray](https://github.com/hi-hi-ray)
+* **Raysa Dutra** - [hi-hi-ray](https://github.com/hi-hi-ray)
 
 Veja também a lista de [contribuidores](https://github.com/your/project/contributors) que participaram deste projeto.
 
