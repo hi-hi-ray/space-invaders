@@ -66,8 +66,6 @@ Adicione notas adicionais sobre como implantar isso em um sistema ao vivo
 
 * **Raysa Dutra** - [hi-hi-ray](https://github.com/hi-hi-ray)
 
-Veja também a lista de [contribuidores](https://github.com/your/project/contributors) que participaram deste projeto.
-
 ## Licença
 
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE.md](LICENSE.md) para obter detalhes
