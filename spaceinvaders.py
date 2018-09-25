@@ -2,7 +2,7 @@
 # Created by Lee Robinson
 # Adapted by Raysa Dutra
 
-#!/usr/bin/env python
+# !/usr/bin/env python
 from pygame import *
 import pygame.draw
 from nave import Ship
@@ -14,8 +14,11 @@ from explosao import Explosion
 from vida import Life
 from texto import Text
 import sys
-from random import shuffle, randrange, choice
-import numpy  as np
+from random import shuffle, choice
+import numpy as np
+import peewee
+from pontos_dao import ScoreDao
+from pontos import Score
 
 # RGB Constants
 WHITE = (255, 255, 255)
@@ -25,10 +28,10 @@ BLUE = (80, 255, 239)
 PURPLE = (203, 0, 255)
 RED = (237, 28, 36)
 
-SCREEN = display.set_mode((800,600))
+SCREEN = display.set_mode((800, 600))
 FONT = "fonts/space_invaders.ttf"
 IMG_NAMES = ["ship", "ship", "mystery", "enemy1_1", "enemy1_2", "enemy2_1", "enemy2_2",
-                "enemy3_1", "enemy3_2", "explosionblue", "explosiongreen", "explosionpurple", "laser", "enemylaser"]
+             "enemy3_1", "enemy3_2", "explosionblue", "explosiongreen", "explosionpurple", "laser", "enemylaser"]
 IMAGE = {name: image.load("images/{}.png".format(name)).convert_alpha() for name in IMG_NAMES}
 
 
@@ -50,7 +53,6 @@ class SpaceInvaders(object):
         # Current enemy starting position
         self.enemyPosition = self.enemyPositionStart
 
-
     def reset(self, score, lives, newGame=False):
         self.player = Ship(IMAGE, game)
         self.playerGroup = sprite.Group(self.player)
@@ -64,7 +66,8 @@ class SpaceInvaders(object):
         self.make_enemies()
         # Only create blockers on a new game, not a new round
         if newGame:
-            self.allBlockers = sprite.Group(self.make_blockers(0), self.make_blockers(1), self.make_blockers(2), self.make_blockers(3))
+            self.allBlockers = sprite.Group(self.make_blockers(0), self.make_blockers(1), self.make_blockers(2),
+                                            self.make_blockers(3))
         self.keys = key.get_pressed()
         self.clock = time.Clock()
         self.timer = time.get_ticks()
@@ -139,16 +142,16 @@ class SpaceInvaders(object):
     def background_stars(self, game):
         # The background stars:
         # Set the position:
-        self.stars_x = np.random.rand(5)*800
-        self.stars_y = np.random.rand(5)*600
+        self.stars_x = np.random.rand(5) * 800
+        self.stars_y = np.random.rand(5) * 600
         # Set the velocity:
         self.stars_v = np.zeros(5)
         for i in np.arange(5):
-            self.stars_v[i] = int(0.5 + np.random.uniform()*0.1)
-        game.stars_y = (game.stars_y + game.stars_v*0.2) % 600
+            self.stars_v[i] = int(0.5 + np.random.uniform() * 0.1)
+        game.stars_y = (game.stars_y + game.stars_v * 0.2) % 600
         for i in range(5):
             game.stars_x[i] = game.stars_x[i] if not game.stars_v[i] else \
-                game.stars_x[i] + 0.1*int((np.random.rand()-0.5)*2.1)
+                game.stars_x[i] + 0.1 * int((np.random.rand() - 0.5) * 2.1)
             pygame.draw.aaline(game.screen, WHITE,
                                (int(game.stars_x[i]), int(game.stars_y[i])),
                                (int(game.stars_x[i]), int(game.stars_y[i])))
@@ -164,7 +167,7 @@ class SpaceInvaders(object):
         self.enemy4Text = Text(FONT, 25, "   =  ?????", RED, 368, 420)
         self.scoreText = Text(FONT, 20, "Score:", WHITE, 4, 5)
         self.livesText = Text(FONT, 20, "Lives: ", WHITE, 580, 5)
-        self.scoreboardText = Text(FONT, 50, "Scoreboard: ", WHITE, 166, 155)
+        self.leaderboardText = Text(FONT, 50, "Scoreboard: ", WHITE, 150, 100)
 
     def check_input(self):
         self.keys = key.get_pressed()
@@ -175,13 +178,16 @@ class SpaceInvaders(object):
                 if e.key == K_SPACE:
                     if len(self.bullets) == 0 and self.shipAlive:
                         if self.score < 1000:
-                            bullet = Bullet(self.player.rect.x+23, self.player.rect.y+5, -1, 15, "laser", "center", game, IMAGE)
+                            bullet = Bullet(self.player.rect.x + 23, self.player.rect.y + 5, -1, 15, "laser", "center",
+                                            game, IMAGE)
                             self.bullets.add(bullet)
                             self.allSprites.add(self.bullets)
                             self.sounds["shoot"].play()
                         else:
-                            leftbullet = Bullet(self.player.rect.x+8, self.player.rect.y+5, -1, 15, "laser", "left", game, IMAGE)
-                            rightbullet = Bullet(self.player.rect.x+38, self.player.rect.y+5, -1, 15, "laser", "right", game, IMAGE)
+                            leftbullet = Bullet(self.player.rect.x + 8, self.player.rect.y + 5, -1, 15, "laser", "left",
+                                                game, IMAGE)
+                            rightbullet = Bullet(self.player.rect.x + 38, self.player.rect.y + 5, -1, 15, "laser",
+                                                 "right", game, IMAGE)
                             self.bullets.add(leftbullet)
                             self.bullets.add(rightbullet)
                             self.allSprites.add(self.bullets)
@@ -218,7 +224,8 @@ class SpaceInvaders(object):
         for enemy in self.enemies:
             if enemy.column == column and enemy.row == row:
                 if (time.get_ticks() - self.timer) > 700:
-                    self.enemyBullets.add(Bullet(enemy.rect.x + 14, enemy.rect.y + 20, 1, 5, "enemylaser", "center", game, IMAGE))
+                    self.enemyBullets.add(
+                        Bullet(enemy.rect.x + 14, enemy.rect.y + 20, 1, 5, "enemylaser", "center", game, IMAGE))
                     self.allSprites.add(self.enemyBullets)
                     self.timer = time.get_ticks()
 
@@ -237,13 +244,13 @@ class SpaceInvaders(object):
 
     def create_main_menu(self):
         self.enemy1 = IMAGE["enemy3_1"]
-        self.enemy1 = transform.scale(self.enemy1 , (40, 40))
+        self.enemy1 = transform.scale(self.enemy1, (40, 40))
         self.enemy2 = IMAGE["enemy2_2"]
-        self.enemy2 = transform.scale(self.enemy2 , (40, 40))
+        self.enemy2 = transform.scale(self.enemy2, (40, 40))
         self.enemy3 = IMAGE["enemy1_2"]
-        self.enemy3 = transform.scale(self.enemy3 , (40, 40))
+        self.enemy3 = transform.scale(self.enemy3, (40, 40))
         self.enemy4 = IMAGE["mystery"]
-        self.enemy4 = transform.scale(self.enemy4 , (80, 40))
+        self.enemy4 = transform.scale(self.enemy4, (80, 40))
         self.screen.blit(self.enemy1, (318, 270))
         self.screen.blit(self.enemy2, (318, 320))
         self.screen.blit(self.enemy3, (318, 370))
@@ -264,7 +271,6 @@ class SpaceInvaders(object):
             for enemy in self.enemies:
                 enemy.moveTime = 200
 
-
     def check_collisions(self):
         collidedict = sprite.groupcollide(self.bullets, self.enemyBullets, True, False)
         if collidedict:
@@ -282,7 +288,7 @@ class SpaceInvaders(object):
                     self.killedColumn = currentSprite.column
                     score = self.calculate_score(currentSprite.row)
                     explosion = Explosion(currentSprite.rect.x, currentSprite.rect.y, currentSprite.row, False, False,
-                                          score, FONT, WHITE,IMAGE, game)
+                                          score, FONT, WHITE, IMAGE, game)
                     self.explosionsGroup.add(explosion)
                     self.allSprites.remove(currentSprite)
                     self.enemies.remove(currentSprite)
@@ -297,7 +303,7 @@ class SpaceInvaders(object):
                     self.sounds["mysterykilled"].play()
                     score = self.calculate_score(currentSprite.row)
                     explosion = Explosion(currentSprite.rect.x, currentSprite.rect.y, currentSprite.row, False, True,
-                                          score,FONT, WHITE, IMAGE, game)
+                                          score, FONT, WHITE, IMAGE, game)
                     self.explosionsGroup.add(explosion)
                     self.allSprites.remove(currentSprite)
                     self.mysteryGroup.remove(currentSprite)
@@ -359,39 +365,72 @@ class SpaceInvaders(object):
             self.makeNewShip = False
             self.shipAlive = True
 
-    def create_game_over(self, currentTime):
-        self.screen.blit(self.background, (0,0))
+    def create_game_over(self, current_time):
+        self.screen.blit(self.background, (0, 0))
         self.background_stars(game)
-        if currentTime - self.timer < 750:
+        if current_time - self.timer < 750:
             self.gameOverText.draw(self.screen)
-        if currentTime - self.timer > 750 and currentTime - self.timer < 1500:
-            self.screen.blit(self.background, (0,0))
-        if currentTime - self.timer > 1500 and currentTime - self.timer < 2250:
+        if current_time - self.timer > 750 and current_time - self.timer < 1500:
+            self.screen.blit(self.background, (0, 0))
+        if current_time - self.timer > 1500 and current_time - self.timer < 2250:
             self.gameOverText.draw(self.screen)
-        if currentTime - self.timer > 2250 and currentTime - self.timer < 2750:
-            self.screen.blit(self.background, (0,0))
-        if currentTime - self.timer > 3000:
-            self.create_scoreboard()
+        if current_time - self.timer > 2250 and current_time - self.timer < 2750:
+            self.screen.blit(self.background, (0, 0))
+        if current_time - self.timer > 3000:
+            scoreboard = Score()
+            scoreboard.save_score(self.score)
+            self.startGame = False
+            self.gameOver = False
+            self.mainScreen = False
+            self.scoreBoard = True
 
         for e in event.get():
             if e.type == QUIT:
                 sys.exit()
 
-    def create_scoreboard(self):
-        self.screen.blit(self.background, (0,0))
+    def create_scoreboard(self, scores):
+        print(scores)
+
+        self.screen.blit(self.background, (0, 0))
         self.background_stars(game)
+
+        self.scoreboardText = Text(FONT, 20, "1- " + str(scores[0]), WHITE, 235, 201)
+        self.scoreboardText2 = Text(FONT, 20, "2- " + str(scores[1]), WHITE, 235, 221)
+        self.scoreboardText3 = Text(FONT, 20, "3- " + str(scores[2]), WHITE, 235, 241)
+        self.scoreboardText4 = Text(FONT, 20, "4- " + str(scores[3]), WHITE, 235, 261)
+        self.scoreboardText5 = Text(FONT, 20, "5- " + str(scores[4]), WHITE, 235, 281)
+        self.scoreboardText6 = Text(FONT, 20, "6- " + str(scores[5]), WHITE, 435, 201)
+        self.scoreboardText7 = Text(FONT, 20, "7- " + str(scores[6]), WHITE, 435, 221)
+        self.scoreboardText8 = Text(FONT, 20, "8- " + str(scores[7]), WHITE, 435, 241)
+        self.scoreboardText9 = Text(FONT, 20, "9- " + str(scores[8]), WHITE, 435, 261)
+        self.scoreboardText10 = Text(FONT, 20, "10- " + str(scores[9]), WHITE, 435, 281)
+
+        self.leaderboardText.draw(self.screen)
         self.scoreboardText.draw(self.screen)
+        self.scoreboardText2.draw(self.screen)
+        self.scoreboardText3.draw(self.screen)
+        self.scoreboardText4.draw(self.screen)
+        self.scoreboardText5.draw(self.screen)
+        self.scoreboardText6.draw(self.screen)
+        self.scoreboardText7.draw(self.screen)
+        self.scoreboardText8.draw(self.screen)
+        self.scoreboardText9.draw(self.screen)
+        self.scoreboardText10.draw(self.screen)
 
         for e in event.get():
-            if e.type == QUIT:
-                sys.exit()
-
+                if e.type == QUIT:
+                    sys.exit()
+                if e.type == KEYUP:
+                    self.startGame = False
+                    self.gameOver = False
+                    self.scoreBoard = False
+                    self.mainScreen = True
 
     def main(self):
         while True:
             if self.mainScreen:
                 self.reset(0, 5, True)
-                self.screen.blit(self.background, (0,0))
+                self.screen.blit(self.background, (0, 0))
                 self.background_stars(game)
                 self.titleText.draw(self.screen)
                 self.titleText2.draw(self.screen)
@@ -403,9 +442,9 @@ class SpaceInvaders(object):
 
             elif self.startGame:
                 if len(self.enemies) == 0:
-                    currentTime = time.get_ticks()
-                    if currentTime - self.gameTimer < 3000:
-                        self.screen.blit(self.background, (0,0))
+                    current_time = time.get_ticks()
+                    if current_time - self.gameTimer < 3000:
+                        self.screen.blit(self.background, (0, 0))
                         self.background_stars(game)
                         self.scoreText2 = Text(FONT, 20, str(self.score), GREEN, 85, 5)
                         self.scoreText.draw(self.screen)
@@ -414,16 +453,16 @@ class SpaceInvaders(object):
                         self.livesText.draw(self.screen)
                         self.livesGroup.update(self.keys)
                         self.check_input()
-                    if currentTime - self.gameTimer > 3000:
+                    if current_time - self.gameTimer > 3000:
                         # Move enemies closer to bottom
                         self.enemyPositionStart += 35
                         self.reset(self.score, self.lives)
                         self.make_enemies()
                         self.gameTimer += 3000
                 else:
-                    currentTime = time.get_ticks()
-                    self.play_main_music(currentTime)
-                    self.screen.blit(self.background, (0,0))
+                    current_time = time.get_ticks()
+                    self.play_main_music(current_time)
+                    self.screen.blit(self.background, (0, 0))
                     self.background_stars(game)
                     self.allBlockers.update(self.screen)
                     self.scoreText2 = Text(FONT, 20, str(self.score), GREEN, 85, 5)
@@ -431,26 +470,34 @@ class SpaceInvaders(object):
                     self.scoreText2.draw(self.screen)
                     self.livesText.draw(self.screen)
                     self.check_input()
-                    self.allSprites.update(self.keys, currentTime, self.killedRow, self.killedColumn, self.killedArray)
-                    self.explosionsGroup.update(self.keys, currentTime)
+                    self.allSprites.update(self.keys, current_time, self.killedRow, self.killedColumn, self.killedArray)
+                    self.explosionsGroup.update(self.keys, current_time)
                     self.check_collisions()
-                    self.create_new_ship(self.makeNewShip, currentTime)
+                    self.create_new_ship(self.makeNewShip, current_time)
                     self.update_enemy_speed()
 
                     if len(self.enemies) > 0:
                         self.make_enemies_shoot()
 
             elif self.gameOver:
-                currentTime = time.get_ticks()
+                current_time = time.get_ticks()
                 # Reset enemy starting position
                 self.enemyPositionStart = self.enemyPositionDefault
-                self.create_game_over(currentTime)
+                self.create_game_over(current_time)
 
+            elif self.scoreBoard:
+                scoreboard = Score()
+                self.scores = scoreboard.order_scores()
+                self.create_scoreboard(self.scores)
 
             display.update()
             self.clock.tick(60)
 
 
 if __name__ == '__main__':
+    try:
+        ScoreDao.create_table()
+    except peewee.OperationalError:
+        print('Tabela ja existe!')
     game = SpaceInvaders()
     game.main()

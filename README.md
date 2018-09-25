@@ -9,21 +9,11 @@ Essas instruções fornecerão uma cópia do projeto em funcionamento em sua má
 
 * Sistema Debian
 * Python
+* sqlitebrowser
 
 ### Instalando
 
-É necessário para rodarmos o projeto ter os seguintes pacotes no linux instalado:
-
-* build-essential 
-* freeglut3-dev 
-* libfreeimage-dev 
-* libgl1-mesa-dev 
-* libopenal-dev 
-* libpango1.0-dev 
-* libsdl-mixer1.2-dev 
-* libsdl-ttf2.0-dev 
-* libsndfile-dev 
-* libxinerama-dev
+É necessário para rodarmos o projeto ter instalado o pygame
 
 Caso você não possua os pacotes acima, você pode executar o comando abaixo que irá instalar tudo de uma vez só.
 
