@@ -42,6 +42,7 @@ class SpaceInvaders(object):
         self.startGame = False
         self.mainScreen = True
         self.gameOver = False
+        self.scoreBoard = False
         # Initial value for a new game
         self.enemyPositionDefault = 65
         # Counter for enemy starting position (increased each new round)
@@ -138,14 +139,14 @@ class SpaceInvaders(object):
     def background_stars(self, game):
         # The background stars:
         # Set the position:
-        self.stars_x = np.random.rand(50)*800
-        self.stars_y = np.random.rand(50)*600
+        self.stars_x = np.random.rand(5)*800
+        self.stars_y = np.random.rand(5)*600
         # Set the velocity:
-        self.stars_v = np.zeros(50)
-        for i in np.arange(50):
-            self.stars_v[i] = int(0.5 + np.random.uniform()*1)
+        self.stars_v = np.zeros(5)
+        for i in np.arange(5):
+            self.stars_v[i] = int(0.5 + np.random.uniform()*0.1)
         game.stars_y = (game.stars_y + game.stars_v*0.2) % 600
-        for i in range(50):
+        for i in range(5):
             game.stars_x[i] = game.stars_x[i] if not game.stars_v[i] else \
                 game.stars_x[i] + 0.1*int((np.random.rand()-0.5)*2.1)
             pygame.draw.aaline(game.screen, WHITE,
@@ -155,14 +156,15 @@ class SpaceInvaders(object):
     def create_text(self):
         self.titleText = Text(FONT, 50, "Space Invaders", WHITE, 164, 155)
         self.titleText2 = Text(FONT, 25, "Press any key to continue ...", WHITE, 201, 225)
-        self.gameOverText = Text(FONT, 50, "Game Over !", WHITE, 250, 270)
-        self.nextRoundText = Text(FONT, 50, "Next Round !", WHITE, 240, 270)
+        self.gameOverText = Text(FONT, 50, "Game Over! ", WHITE, 250, 270)
+        self.nextRoundText = Text(FONT, 50, "Next Round! ", WHITE, 240, 270)
         self.enemy1Text = Text(FONT, 25, "   =  10 pts", GREEN, 368, 270)
         self.enemy2Text = Text(FONT, 25, "   =  20 pts", BLUE, 368, 320)
         self.enemy3Text = Text(FONT, 25, "   =  30 pts", PURPLE, 368, 370)
         self.enemy4Text = Text(FONT, 25, "   =  ?????", RED, 368, 420)
         self.scoreText = Text(FONT, 20, "Score:", WHITE, 4, 5)
         self.livesText = Text(FONT, 20, "Lives: ", WHITE, 580, 5)
+        self.scoreboardText = Text(FONT, 50, "Scoreboard: ", WHITE, 166, 155)
 
     def check_input(self):
         self.keys = key.get_pressed()
@@ -359,6 +361,7 @@ class SpaceInvaders(object):
 
     def create_game_over(self, currentTime):
         self.screen.blit(self.background, (0,0))
+        self.background_stars(game)
         if currentTime - self.timer < 750:
             self.gameOverText.draw(self.screen)
         if currentTime - self.timer > 750 and currentTime - self.timer < 1500:
@@ -368,11 +371,21 @@ class SpaceInvaders(object):
         if currentTime - self.timer > 2250 and currentTime - self.timer < 2750:
             self.screen.blit(self.background, (0,0))
         if currentTime - self.timer > 3000:
-            self.mainScreen = True
+            self.create_scoreboard()
 
         for e in event.get():
             if e.type == QUIT:
                 sys.exit()
+
+    def create_scoreboard(self):
+        self.screen.blit(self.background, (0,0))
+        self.background_stars(game)
+        self.scoreboardText.draw(self.screen)
+
+        for e in event.get():
+            if e.type == QUIT:
+                sys.exit()
+
 
     def main(self):
         while True:
@@ -430,9 +443,9 @@ class SpaceInvaders(object):
             elif self.gameOver:
                 currentTime = time.get_ticks()
                 # Reset enemy starting position
-                self.background_stars(game)
                 self.enemyPositionStart = self.enemyPositionDefault
                 self.create_game_over(currentTime)
+
 
             display.update()
             self.clock.tick(60)
