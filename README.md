@@ -1,62 +1,49 @@
 # space-invaders
 Assignment from Infnet
 
-## Começando
-
-Essas instruções fornecerão uma cópia do projeto em funcionamento em sua máquina local para fins de desenvolvimento e teste. Consulte a implantação de notas sobre como implantar o projeto em um sistema ao vivo.
-
 ### Pré-requisitos
 
 * Sistema Debian
-* Python
+* Python 3
 * sqlitebrowser
+* PyGame
+* Pip
 
-### Instalando
-
-É necessário para rodarmos o projeto ter instalado o pygame
-
-Caso você não possua os pacotes acima, você pode executar o comando abaixo que irá instalar tudo de uma vez só.
-
-``` 
-sudo apt-get install build-essential freeglut3-dev libfreeimage-dev libgl1-mesa-dev libopenal-dev libpango1.0-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsndfile-dev libxinerama-dev
+Caso não tenha as bibliotecas de python instaladas, basta rodar o comando abaixo:
 
 ```
+pip install -r requirements.txt
+```
 
-É necessário instalar o Gemfile
+### Rodando o jogo
 
+```
+  python spaceinvaders.py
+```
 
 ## Executando os testes
 
-Explique como executar os testes automatizados para este sistema
+### Teste de estado
 
-### Divulgue em testes de ponta a ponta
+```
+  pytest estado_teste.py
+```
+
+### Teste de pontuação
 
 Explique o que esses testes testam e por que
 
 ```
-  Dê um exemplo
+  pytest pontos_teste.py
 ```
-
-### E testes de estilo de codificação
-
-Explique o que esses testes testam e por que
-
-```
-  Dê um exemplo
-```
-
-## Desdobramento, desenvolvimento
-
-Adicione notas adicionais sobre como implantar isso em um sistema ao vivo
 
 ## Built With
 
-* [PyGame]() - Usada como base para fazer o jogo
+* PyGame - Usada como base para fazer o jogo
+* PeeWee - ORM do Jogo
 
-## Autores
+## Autora
 
 * **Raysa Dutra** - [hi-hi-ray](https://github.com/hi-hi-ray)
 
-## Licença
-
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE.md](LICENSE.md) para obter detalhes
+## esse código foi baseado no repositório a seguir: https://github.com/leerob/Space_Invaders 
