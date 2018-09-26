@@ -17,7 +17,9 @@ import sys
 from random import shuffle, choice
 import numpy as np
 import peewee
-from pontos_dao import ScoreOrm
+from pontos_orm import ScoreOrm
+from estados_orm import StateOrm
+from estados import State
 from pontos import Score
 
 # RGB Constants
@@ -284,6 +286,8 @@ class SpaceInvaders(object):
             for value in enemiesdict.values():
                 for currentSprite in value:
                     self.sounds["invaderkilled"].play()
+                    player_state = State()
+                    player_state.save_state(self.player.rect.x, self.lives, "invader")
                     self.killedRow = currentSprite.row
                     self.killedColumn = currentSprite.column
                     score = self.calculate_score(currentSprite.row)
@@ -301,6 +305,8 @@ class SpaceInvaders(object):
                 for currentSprite in value:
                     currentSprite.mysteryEntered.stop()
                     self.sounds["mysterykilled"].play()
+                    player_state = State()
+                    player_state.save_state(self.player.rect.x, self.lives, "mystery")
                     score = self.calculate_score(currentSprite.row)
                     explosion = Explosion(currentSprite.rect.x, currentSprite.rect.y, currentSprite.row, False, True,
                                           score, FONT, WHITE, IMAGE, game)
@@ -389,8 +395,6 @@ class SpaceInvaders(object):
                 sys.exit()
 
     def create_scoreboard(self, scores):
-        print(scores)
-
         self.screen.blit(self.background, (0, 0))
         self.background_stars(game)
 
@@ -497,6 +501,7 @@ class SpaceInvaders(object):
 if __name__ == '__main__':
     try:
         ScoreOrm.create_table()
+        StateOrm.create_table()
     except peewee.OperationalError:
         print('Tabela ja existe!')
     game = SpaceInvaders()

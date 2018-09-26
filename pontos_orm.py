@@ -1,6 +1,5 @@
 # Space Invaders
-# Created by Lee Robinson
-# Adapted by Raysa Dutra
+# Created by Raysa Dutra
 
 # -*- coding: utf-8 -*-
 # !/usr/bin/env python

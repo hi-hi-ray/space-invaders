@@ -1,18 +1,14 @@
 # Space Invaders
-# Created by Lee Robinson
-# Adapted by Raysa Dutra
+# Created by Raysa Dutra
 
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-from pygame import *
-from pontos_dao import ScoreOrm
+from pontos_orm import ScoreOrm
 
 
 class Score(object):
     def __init__(self):
-        sprite.Sprite.__init__(self)
-        self.newhiscore = False
         self.dao = ScoreOrm()
 
     def order_scores(self):
