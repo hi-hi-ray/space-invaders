@@ -10,7 +10,8 @@ import peewee
 # Connect to the SQLite database
 db = peewee.SqliteDatabase('leaderboard.db')
 
-class ScoreDao(peewee.Model):
+
+class ScoreOrm(peewee.Model):
     score = peewee.IntegerField()
 
     class Meta:

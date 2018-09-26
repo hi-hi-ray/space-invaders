@@ -6,15 +6,14 @@
 #!/usr/bin/env python
 
 from pygame import *
-from pygame.sprite import Sprite
-from pontos_dao import ScoreDao
+from pontos_dao import ScoreOrm
 
 
 class Score(object):
     def __init__(self):
         sprite.Sprite.__init__(self)
         self.newhiscore = False
-        self.dao = ScoreDao()
+        self.dao = ScoreOrm()
 
     def order_scores(self):
         self.scores = self.get_all_scores()
@@ -25,5 +24,5 @@ class Score(object):
         self.dao.create(score=score)
 
     def get_all_scores(self):
-        sd = ScoreDao
+        sd = ScoreOrm
         return [i.score for i in sd.select()]

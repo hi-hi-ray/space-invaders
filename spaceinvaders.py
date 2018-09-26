@@ -17,7 +17,7 @@ import sys
 from random import shuffle, choice
 import numpy as np
 import peewee
-from pontos_dao import ScoreDao
+from pontos_dao import ScoreOrm
 from pontos import Score
 
 # RGB Constants
@@ -496,7 +496,7 @@ class SpaceInvaders(object):
 
 if __name__ == '__main__':
     try:
-        ScoreDao.create_table()
+        ScoreOrm.create_table()
     except peewee.OperationalError:
         print('Tabela ja existe!')
     game = SpaceInvaders()
